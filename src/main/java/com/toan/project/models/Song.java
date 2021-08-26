@@ -22,15 +22,15 @@ public class Song {
     @Column(name="name")
     private String name;
 
-    @NotBlank
-    @Size(max = 50)
-    @Column(name = "genre")
-    private String genre;
+//    @NotBlank
+//    @Size(max = 50)
+//    @Column(name = "genre")
+//    private String genre;
 
-    @NotBlank
-    @Size(max = 100)
-    @Column(name="description")
-    private String description;
+//    @NotBlank
+//    @Size(max = 100)
+//    @Column(name="description")
+//    private String description;
 
 
 
@@ -63,20 +63,20 @@ public class Song {
         this.name = name;
     }
 
-    public String getGenre() {
-        return genre;
-    }
+//    public String getGenre() {
+//        return genre;
+//    }
+//
+//    public void setGenre(String genre) {
+//        this.genre = genre;
+//    }
 
-    public void setGenre(String genre) {
-        this.genre = genre;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
+//    public String getDescription() {
+//        return description;
+//    }
+//
+//    public void setDescription(String description) {
+//        this.description = description;
+//    }
 
 }

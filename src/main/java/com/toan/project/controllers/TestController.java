@@ -22,17 +22,11 @@ import java.util.stream.Collectors;
 @RequestMapping("/api/test")
 public class TestController {
 
-    @Autowired
-    SongRepository songRepository;
+
     @Autowired
     UserRepository userRepository;
 
-    @GetMapping("/songs")
-    public List<Song> getSongs() {
 
-        List<Song> songs = songRepository.findAll();
-        return songs;
-    }
 //
 //    @GetMapping("/artists")
 //    public List<UserPayload> getArtists() {
