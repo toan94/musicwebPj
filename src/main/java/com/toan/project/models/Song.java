@@ -5,6 +5,7 @@ import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
+import java.util.Set;
 
 @Entity
 @Table(	name = "songs")
@@ -22,6 +23,8 @@ public class Song {
     @Column(name="name")
     private String name;
 
+    @ManyToMany(mappedBy = "Songs")
+    private Set<Playlist> currentlyInPlayListSet;
 //    @NotBlank
 //    @Size(max = 50)
 //    @Column(name = "genre")
@@ -38,6 +41,14 @@ public class Song {
     @JoinColumn(name="user_id")
     @NotNull
     private User artist;
+
+    public Set<Playlist> getCurrentlyInPlayListSet() {
+        return currentlyInPlayListSet;
+    }
+
+    public void setCurrentlyInPlayListSet(Set<Playlist> currentlyInPlayListSet) {
+        this.currentlyInPlayListSet = currentlyInPlayListSet;
+    }
 
     public User getArtist() {
         return artist;
