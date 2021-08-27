@@ -42,7 +42,26 @@ public class User {
 	@OneToMany(mappedBy = "artist", cascade = CascadeType.ALL)
 	private Set<Song> songs;
 
+	@OneToMany(mappedBy = "OwnedUser", cascade = CascadeType.ALL)
+	private Set<Playlist> ListOfPlaylist;
+
 	public User() {
+	}
+
+	public Long getUser_id() {
+		return user_id;
+	}
+
+	public void setUser_id(Long user_id) {
+		this.user_id = user_id;
+	}
+
+	public Set<Playlist> getListOfPlaylist() {
+		return ListOfPlaylist;
+	}
+
+	public void setListOfPlaylist(Set<Playlist> listOfPlaylist) {
+		ListOfPlaylist = listOfPlaylist;
 	}
 
 	public User(String username, String email, String password) {

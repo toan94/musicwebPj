@@ -60,7 +60,7 @@ public class TestController {
 
             users = pageUsers.getContent();
             List<UserPayload> uPayload = users.stream().map((u)->{
-                return new UserPayload(u.getUsername(), u.getEmail(), "https://hatrabbits.com/wp-content/uploads/2017/01/random.jpg");
+                return new UserPayload(u.getUsername(), u.getEmail(), "https://www.queensu.ca/artsci_online/sites/default/files/styles/hero_image/public/img/course/musc_171-mic_bokeh.jpg?itok=CkRG-0JE");
             }).collect(Collectors.toList());
 
             Map<String, Object> response = new HashMap<>();
