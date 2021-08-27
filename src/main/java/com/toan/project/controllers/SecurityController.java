@@ -20,8 +20,9 @@ public class SecurityController {
     public String currentUserName(Authentication authentication) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (!(authentication instanceof AnonymousAuthenticationToken)) {
-            String currentUserName = auth.getName();
-            return currentUserName;
+            UserDetailsImpl userDetails = (UserDetailsImpl) auth.getPrincipal();
+            userDetails.getId();
+            return "zxc";
         }
         return authentication.getName();
     }

@@ -5,6 +5,8 @@ import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
+
+import java.util.Date;
 import java.util.Set;
 
 @Entity
@@ -34,6 +36,21 @@ public class Playlist {
     )
     private Set<Song> Songs;
 
+    @Temporal(TemporalType.DATE)
+    Date creationDate;
+
+    @PrePersist
+    protected void onCreate() {
+        creationDate = new Date();
+    }
+
+    public Date getCreationDate() {
+        return creationDate;
+    }
+
+    public void setCreationDate(Date creationDate) {
+        this.creationDate = creationDate;
+    }
 
     public Set<Song> getSongs() {
         return Songs;
