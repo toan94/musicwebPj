@@ -3,15 +3,25 @@ package com.toan.project.payload;
 import java.util.Date;
 
 public class PlaylistPayload {
+    private long id;
     private String PlaylistName;
     private String OwnedUserName;
     private Date creationDate;
 
 
-    public PlaylistPayload(String playlistName, String ownedUserName, Date creationDate) {
+    public PlaylistPayload(long id, String playlistName, String ownedUserName, Date creationDate) {
+        this.id = id;
         PlaylistName = playlistName;
         OwnedUserName = ownedUserName;
         this.creationDate = creationDate;
+    }
+
+    public long getId() {
+        return id;
+    }
+
+    public void setId(long id) {
+        this.id = id;
     }
 
     public Date getCreationDate() {

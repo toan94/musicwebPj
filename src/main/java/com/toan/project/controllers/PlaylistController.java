@@ -23,10 +23,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
@@ -46,41 +43,55 @@ public class PlaylistController {
             @RequestParam(defaultValue = "3") int size,
             @RequestParam(defaultValue = "false") boolean noPaging
     ) {
-        String a = "gg";
-        try {
-            if(noPaging) {
-                List<Playlist> pl = playlistRepository.findAll();
-                List<PlaylistPayload> pPayload = pl.stream().map((p)->{
-                    return new PlaylistPayload(p.getName(), p.getOwnedUser().getUsername(), p.getCreationDate());
-                }).collect(Collectors.toList());
-                Map<String, Object> response = new HashMap<>();
-                response.put("listOfPlaylist", pPayload);
-                return new ResponseEntity<>(response, HttpStatus.OK);
-            }
-            List<Playlist> playlists = new ArrayList<>();
-            Pageable paging = PageRequest.of(page, size, Sort.by("id").descending());
-
-            Page<Playlist> pagePlaylists;
-            if (title == null)
-                pagePlaylists = playlistRepository.findAll(paging);
-            else
-                pagePlaylists = playlistRepository.findByNameContaining(title, paging);
-//            pagePlaylists = playlistRepository.findAll(paging);
-
-            playlists = pagePlaylists.getContent();
+//        try {
+//            if(noPaging) {
+//                List<Playlist> pl = playlistRepository.findAll();
+//                List<PlaylistPayload> pPayload = pl.stream().map((p)->{
+//                    return new PlaylistPayload(p.getId(), p.getName(), p.getOwnedUser().getUsername(), p.getCreationDate());
+//                }).collect(Collectors.toList());
+//                Map<String, Object> response = new HashMap<>();
+//                response.put("listOfPlaylist", pPayload);
+//                return new ResponseEntity<>(response, HttpStatus.OK);
+//            }
+//            List<Playlist> playlists = new ArrayList<>();
+//            Pageable paging = PageRequest.of(page, size, Sort.by("id").descending());
+//
+//            Page<Playlist> pagePlaylists;
+//            if (title == null)
+//                pagePlaylists = playlistRepository.findAll(paging);
+//            else
+//                pagePlaylists = playlistRepository.findByNameContaining(title, paging);
+////            pagePlaylists = playlistRepository.findAll(paging);
+//
+//            playlists = pagePlaylists.getContent();
+//            List<PlaylistPayload> pPayload = playlists.stream().map((p)->{
+//                return new PlaylistPayload(p.getId(), p.getName(), p.getOwnedUser().getUsername(), p.getCreationDate());
+//            }).collect(Collectors.toList());
+//
+//            Map<String, Object> response = new HashMap<>();
+//            response.put("listOfPlaylist", pPayload);
+//            response.put("currentPage", pagePlaylists.getNumber());
+//            response.put("totalItems", pagePlaylists.getTotalElements());
+//            response.put("totalPages", pagePlaylists.getTotalPages());
+//
+//            return new ResponseEntity<>(response, HttpStatus.OK);
+//        } catch (Exception e) {
+//            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+//        }
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (!(auth instanceof AnonymousAuthenticationToken)) {
+            UserDetailsImpl userDetails = (UserDetailsImpl) auth.getPrincipal();
+            User currentUser = userRepository.findById(userDetails.getId()).get();
+            Set<Playlist> playlists = currentUser.getListOfPlaylist();
             List<PlaylistPayload> pPayload = playlists.stream().map((p)->{
-                return new PlaylistPayload(p.getName(), p.getOwnedUser().getUsername(), p.getCreationDate());
+                return new PlaylistPayload(p.getId(), p.getName(), p.getOwnedUser().getUsername(), p.getCreationDate());
             }).collect(Collectors.toList());
-
             Map<String, Object> response = new HashMap<>();
             response.put("listOfPlaylist", pPayload);
-            response.put("currentPage", pagePlaylists.getNumber());
-            response.put("totalItems", pagePlaylists.getTotalElements());
-            response.put("totalPages", pagePlaylists.getTotalPages());
-
             return new ResponseEntity<>(response, HttpStatus.OK);
-        } catch (Exception e) {
-            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+
+        }else{
+            return  ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
     }
 
