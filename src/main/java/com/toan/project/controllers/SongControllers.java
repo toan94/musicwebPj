@@ -156,4 +156,26 @@ public class SongControllers {
             return  ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
     }
+
+
+    @GetMapping("/songsFromPlaylist")
+    public ResponseEntity<Map<String, Object>> getAllSongsFromPlaylist(@RequestParam Long playlistId) {
+
+
+        Optional<Playlist> playlist = playlistRepository.findById(playlistId);
+        if (playlist.isPresent()) {
+            Playlist pl = playlist.get();
+            List<SongPayLoad> sPayload = pl.getSongs().stream().map((s)->{
+                return new SongPayLoad(s.getId(), s.getName(), s.getArtist().getUsername());
+            }).collect(Collectors.toList());
+            Map<String, Object> response = new HashMap<>();
+            response.put("songList", sPayload);
+            response.put("playlistName", pl.getName());
+            response.put("creationDate", pl.getCreationDate());
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } else return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+
+
+    }
+
 }
