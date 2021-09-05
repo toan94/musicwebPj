@@ -7,6 +7,7 @@ import com.amazonaws.regions.Regions;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.CannedAccessControlList;
+import com.amazonaws.services.s3.model.CopyObjectRequest;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.services.s3.model.PutObjectResult;
 import org.springframework.stereotype.Service;
@@ -42,7 +43,7 @@ public class StorageService {
     public void putFile(String key, File f){
 
         PutObjectResult result =
-                s3client.putObject(new PutObjectRequest("toantestt", key, f).withCannedAcl(CannedAccessControlList.PublicRead));
+                s3client.putObject(new PutObjectRequest("toantestt", key, f).withCannedAcl(CannedAccessControlList.PublicReadWrite));
 
         System.out.println(result);
 //        s3client.putObject(
@@ -62,9 +63,16 @@ public class StorageService {
 
     }
 
+    public void renameFile(String oldKey, String newKey) {
+        CopyObjectRequest copyObjRequest = new CopyObjectRequest("toantestt",
+                oldKey, "toantestt", newKey);
+        copyObjRequest.setCannedAccessControlList(CannedAccessControlList.PublicReadWrite);
+        s3client.copyObject(copyObjRequest);
+//        deleteFile(oldKey);
+    }
+
     public void deleteFile(String key) {
         s3client.deleteObject("toantestt",key);
-
     }
 
 

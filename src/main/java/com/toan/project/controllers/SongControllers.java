@@ -6,6 +6,7 @@ import com.toan.project.models.User;
 import com.toan.project.payload.SongPayLoad;
 import com.toan.project.payload.request.ActionOnPlaylistRequestPayload;
 import com.toan.project.payload.request.NewSongNameEditRequest;
+import com.toan.project.payload.request.SongDeleteRequestPayload;
 import com.toan.project.repository.PlaylistRepository;
 import com.toan.project.repository.SongRepository;
 import com.toan.project.repository.UserRepository;
@@ -210,6 +211,9 @@ public class SongControllers {
         Optional<Song> Song = songRepository.findById(editInfo.getSongId());
         if (Song.isPresent()) {
             Song s = Song.get();
+
+            storageService.renameFile(s.getName()+".mp3", editInfo.getNewSongName()+".mp3");
+
             s.setName(editInfo.getNewSongName());
             songRepository.save(s);
             return new ResponseEntity<>(null, HttpStatus.OK);
@@ -219,21 +223,31 @@ public class SongControllers {
 
     @PostMapping("/upload")
     public ResponseEntity<?> uploadNewSong(@RequestParam MultipartFile file, @RequestParam String songName) throws IOException {
+
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        UserDetailsImpl userDetails = (UserDetailsImpl) auth.getPrincipal();
+        User currentUser = userRepository.findById(userDetails.getId()).get();
+
         File scratchFile = File.createTempFile("prefix", "suffix");
         try {
-
 //            Path path1 = Paths.get("C:/Users/Admin/Desktop", "gg2.mp3");
 //            Files.copy(file.getInputStream(), path1, StandardCopyOption.REPLACE_EXISTING);
             Path tempPath = Paths.get(scratchFile.getAbsolutePath());
             Files.copy(file.getInputStream(), tempPath, StandardCopyOption.REPLACE_EXISTING);
             storageService.putFile(songName+".mp3", scratchFile);
 
-        } catch (IOException err) {System.err.println(err);}
+            Song newSong = new Song();
+            newSong.setName(songName);
+            newSong.setArtist(currentUser);
+            songRepository.save(newSong);
+
+        } catch (Exception err) {System.err.println(err);}
         finally {
             if(scratchFile.exists()) {
                 scratchFile.delete();
             }
         }
+
         return new ResponseEntity<>(null, HttpStatus.OK);
     }
 
@@ -254,5 +268,23 @@ public class SongControllers {
         } else return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
     }
 
+    @PostMapping("/deleteSong")
+    public ResponseEntity<?> deleteSong(@RequestBody SongDeleteRequestPayload deleteRequestPayload) {
+//        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+//        UserDetailsImpl userDetails = (UserDetailsImpl) auth.getPrincipal();
+//        User currentUser = userRepository.findById(userDetails.getId()).get();
+//
+//        Set<Song> songs = currentUser.getSongs();
+//        Set<Song> updatedSongList = songs.stream().map((s)->{
+//            if (s.getId() != deleteRequestPayload.getSongId())
+//                return s;
+//            else return null;
+//        }).collect(Collectors.toSet());
+//        currentUser.setSongs(updatedSongList);
+//        userRepository.save(currentUser);
+        songRepository.deleteById(deleteRequestPayload.getSongId());
+
+        return new ResponseEntity<>(null, HttpStatus.OK);
+    }
 
 }
