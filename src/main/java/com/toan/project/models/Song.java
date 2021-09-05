@@ -1,6 +1,8 @@
 package com.toan.project.models;
 
 
+import org.springframework.transaction.annotation.Transactional;
+
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
@@ -9,6 +11,7 @@ import java.util.Set;
 
 @Entity
 @Table(	name = "songs")
+@Transactional
 public class Song {
 
     public Song() {

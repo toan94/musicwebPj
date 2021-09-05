@@ -63,6 +63,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/send-notification-to-topic").permitAll()
                 .antMatchers("/sub").permitAll()
                 .antMatchers("/payment").permitAll()
+                .antMatchers("/api/admin/**").permitAll()
                 .anyRequest().authenticated();
 
         http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
