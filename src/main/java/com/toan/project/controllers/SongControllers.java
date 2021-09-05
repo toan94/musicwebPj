@@ -10,6 +10,7 @@ import com.toan.project.repository.PlaylistRepository;
 import com.toan.project.repository.SongRepository;
 import com.toan.project.repository.UserRepository;
 import com.toan.project.security.services.UserDetailsImpl;
+import com.toan.project.storageAWS.StorageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -20,7 +21,14 @@ import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -35,6 +43,9 @@ public class SongControllers {
     UserRepository userRepository;
     @Autowired
     PlaylistRepository playlistRepository;
+
+    @Autowired
+    StorageService storageService;
 
     @GetMapping("/all")
     public ResponseEntity<Map<String, Object>> getAllSongs(
@@ -205,5 +216,43 @@ public class SongControllers {
         }
         else return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
     }
+
+    @PostMapping("/upload")
+    public ResponseEntity<?> uploadNewSong(@RequestParam MultipartFile file, @RequestParam String songName) throws IOException {
+        File scratchFile = File.createTempFile("prefix", "suffix");
+        try {
+
+//            Path path1 = Paths.get("C:/Users/Admin/Desktop", "gg2.mp3");
+//            Files.copy(file.getInputStream(), path1, StandardCopyOption.REPLACE_EXISTING);
+            Path tempPath = Paths.get(scratchFile.getAbsolutePath());
+            Files.copy(file.getInputStream(), tempPath, StandardCopyOption.REPLACE_EXISTING);
+            storageService.putFile(songName+".mp3", scratchFile);
+
+        } catch (IOException err) {System.err.println(err);}
+        finally {
+            if(scratchFile.exists()) {
+                scratchFile.delete();
+            }
+        }
+        return new ResponseEntity<>(null, HttpStatus.OK);
+    }
+
+    @GetMapping("/songsOfUser")
+    public ResponseEntity<Map<String, Object>> getSongsByUsername(@RequestParam String username) {
+        Optional<User> user = userRepository.findByUsername(username);
+        if (user.isPresent()) {
+
+            User u = user.get();
+            Set<Song> songs = u.getSongs();
+            Set<SongPayLoad> sPayload = songs.stream().map((s)->{
+                return new SongPayLoad(s.getId(), s.getName(), s.getArtist().getUsername());
+            }).collect(Collectors.toSet());
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("songList", sPayload);
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } else return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+    }
+
 
 }
