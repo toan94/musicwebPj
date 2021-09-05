@@ -31,6 +31,8 @@ public class User {
 	@Size(max = 120)
 	private String password;
 
+	private String AvatarLink;
+
 	@ManyToMany(fetch = FetchType.LAZY)
 	@JoinTable(	name = "user_roles", 
 				joinColumns = @JoinColumn(name = "user_id"), 
@@ -46,6 +48,14 @@ public class User {
 	private Set<Playlist> ListOfPlaylist;
 
 	public User() {
+	}
+
+	public String getAvatarLink() {
+		return AvatarLink;
+	}
+
+	public void setAvatarLink(String avatarLink) {
+		AvatarLink = avatarLink;
 	}
 
 	public Long getUser_id() {
