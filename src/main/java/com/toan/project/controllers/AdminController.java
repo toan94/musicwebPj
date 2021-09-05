@@ -33,7 +33,7 @@ public class AdminController {
 
     @PostMapping("/deleteUser")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<?> deleteSong(@RequestBody UserDeleteRequestPayload deleteRequestPayload) {
+    public ResponseEntity<?> deleteUser(@RequestBody UserDeleteRequestPayload deleteRequestPayload) {
 
         Optional<User> user = userRepository.findByUsername(deleteRequestPayload.getName());
         if (user.isPresent()) {
@@ -55,9 +55,50 @@ public class AdminController {
 //            User u = user.get();
 //            u.setSongs(null);
 //            userRepository.save(u);
-        }
+        } else return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
 
         userRepository.deleteByUsername(deleteRequestPayload.getName());
+
+        return new ResponseEntity<>(null, HttpStatus.OK);
+    }
+
+    @PostMapping("/deleteSong")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> deleteSong(@RequestBody SongDeleteRequestPayload deleteRequestPayload) {
+
+//        Optional<User> user = userRepository.findByUsername(deleteRequestPayload.getName());
+//        if (user.isPresent()) {
+//            Set<Playlist> playlists= user.get().getListOfPlaylist();
+//            Set<Song> songs= user.get().getSongs();
+//
+//            playlists.forEach((pl)->{
+//                pl.setSongs(null);
+//                playlistRepository.save(pl);
+//            });
+//
+//            songs.forEach((s)->{
+//                s.getCurrentlyInPlayListSet().forEach((pl)->{
+//                    pl.getSongs().remove(s);
+//                    playlistRepository.save(pl);
+//                });
+//                songRepository.delete(s);
+//            });
+//            User u = user.get();
+//            u.setSongs(null);
+//            userRepository.save(u);
+//        }
+
+//        userRepository.deleteByUsername(deleteRequestPayload.getName());
+
+        Optional<Song> song = songRepository.findById(deleteRequestPayload.getSongId());
+        if (song.isPresent()) {
+            Song s = song.get();
+            s.getCurrentlyInPlayListSet().forEach((pl)->{
+                pl.getSongs().remove(s);
+                playlistRepository.save(pl);
+            });
+            songRepository.delete(s);
+        } else return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
 
         return new ResponseEntity<>(null, HttpStatus.OK);
     }
