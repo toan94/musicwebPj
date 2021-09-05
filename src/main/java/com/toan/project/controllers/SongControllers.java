@@ -5,6 +5,7 @@ import com.toan.project.models.Song;
 import com.toan.project.models.User;
 import com.toan.project.payload.SongPayLoad;
 import com.toan.project.payload.request.ActionOnPlaylistRequestPayload;
+import com.toan.project.payload.request.NewSongNameEditRequest;
 import com.toan.project.repository.PlaylistRepository;
 import com.toan.project.repository.SongRepository;
 import com.toan.project.repository.UserRepository;
@@ -174,8 +175,35 @@ public class SongControllers {
             response.put("creationDate", pl.getCreationDate());
             return new ResponseEntity<>(response, HttpStatus.OK);
         } else return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+    }
 
+    @GetMapping("/mySongs")
+    public ResponseEntity<Map<String, Object>> getMySongs() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        UserDetailsImpl userDetails = (UserDetailsImpl) auth.getPrincipal();
+        User currentUser = userRepository.findById(userDetails.getId()).get();
+        Set<Song> songs = currentUser.getSongs();
 
+        Set<SongPayLoad> sPayload = songs.stream().map((s)->{
+            return new SongPayLoad(s.getId(),s.getName(),s.getArtist().getUsername());
+        }).collect(Collectors.toSet());
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("songList", sPayload);
+        return new ResponseEntity<>(response, HttpStatus.OK);
+
+    }
+
+    @PatchMapping("/editSong")
+    public ResponseEntity<?> editSong(@RequestBody NewSongNameEditRequest editInfo) {
+        Optional<Song> Song = songRepository.findById(editInfo.getSongId());
+        if (Song.isPresent()) {
+            Song s = Song.get();
+            s.setName(editInfo.getNewSongName());
+            songRepository.save(s);
+            return new ResponseEntity<>(null, HttpStatus.OK);
+        }
+        else return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
     }
 
 }
