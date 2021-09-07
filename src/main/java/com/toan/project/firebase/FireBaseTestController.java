@@ -2,17 +2,23 @@ package com.toan.project.firebase;
 
 import com.google.firebase.messaging.FirebaseMessagingException;
 import com.google.firebase.messaging.TopicManagementResponse;
+import com.toan.project.models.PushMessage;
+import com.toan.project.models.Song;
 import com.toan.project.models.User;
+import com.toan.project.payload.PushMessagePayload;
+import com.toan.project.payload.SongPayLoad;
 import com.toan.project.repository.UserRepository;
 import com.toan.project.security.services.UserDetailsImpl;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.text.SimpleDateFormat;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
@@ -113,6 +119,47 @@ public class FireBaseTestController {
         currentUser.setFirebaseToken(null);
         userRepository.save(currentUser);
         return "Token deleted";
+    }
+
+
+    @GetMapping("/notifications")
+    public ResponseEntity<Map<String, Object>> getNotifications() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        UserDetailsImpl userDetails = (UserDetailsImpl) auth.getPrincipal();
+        User currentUser = userRepository.findById(userDetails.getId()).get();
+
+        String[] topicsArr;
+        if (currentUser.getTopics() != null)
+            topicsArr = currentUser.getTopics().split(",");
+        else
+            topicsArr = new String[]{};
+
+        List<String> topics = new ArrayList<>(Arrays.asList(topicsArr));
+        List<PushMessage> messages = new ArrayList<>();
+
+        topics.forEach((topic)->{
+            topic = topic.replaceAll("_", " ");
+            userRepository.findByUsername(topic).ifPresent((u)->{
+                messages.addAll(u.getSentMessage());
+            });
+        });
+
+        Collections.sort(messages, (m1, m2) ->{
+            if (m1.getCreationDate().after(m2.getCreationDate())) {
+                return -1;
+            } else return 1;
+        });
+
+        SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
+
+        List<PushMessagePayload> mPayload = messages.stream().map((m)->{
+           return new PushMessagePayload(m.getSubject(), m.getContent(), m.getUrl(), dateFormat.format(m.getCreationDate()));
+        }).collect(Collectors.toList());
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("messages", mPayload);
+        return new ResponseEntity<>(response, HttpStatus.OK);
+//         else return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
     }
 
 }

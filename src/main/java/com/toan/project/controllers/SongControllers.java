@@ -1,6 +1,7 @@
 package com.toan.project.controllers;
 
 import com.toan.project.models.Playlist;
+import com.toan.project.models.PushMessage;
 import com.toan.project.models.Song;
 import com.toan.project.models.User;
 import com.toan.project.payload.SongPayLoad;
@@ -8,6 +9,7 @@ import com.toan.project.payload.request.ActionOnPlaylistRequestPayload;
 import com.toan.project.payload.request.NewSongNameEditRequest;
 import com.toan.project.payload.request.SongDeleteRequestPayload;
 import com.toan.project.repository.PlaylistRepository;
+import com.toan.project.repository.PushMessageRepository;
 import com.toan.project.repository.SongRepository;
 import com.toan.project.repository.UserRepository;
 import com.toan.project.security.services.UserDetailsImpl;
@@ -47,6 +49,9 @@ public class SongControllers {
 
     @Autowired
     StorageService storageService;
+
+    @Autowired
+    PushMessageRepository pushMessageRepository;
 
     @GetMapping("/all")
     public ResponseEntity<Map<String, Object>> getAllSongs(
@@ -240,6 +245,15 @@ public class SongControllers {
             newSong.setName(songName);
             newSong.setArtist(currentUser);
             songRepository.save(newSong);
+
+            String subject = currentUser.getUsername() + " uploaded a new song";
+            String content = "Song name: " + songName;
+            String url = "/artist/" +currentUser.getUsername();
+
+
+            PushMessage pushMessage = new PushMessage(subject, content, url);
+            pushMessage.setSender(currentUser);
+            pushMessageRepository.save(pushMessage);
 
         } catch (Exception err) {System.err.println(err);}
         finally {
