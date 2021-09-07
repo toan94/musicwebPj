@@ -102,11 +102,26 @@ public class FireBaseTestController {
     }
 
     @PostMapping("/saveToken")
-    public String saveFBToken(@RequestParam String firebaseToken){
+    public String saveFBToken(@RequestParam String firebaseToken) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         UserDetailsImpl userDetails = (UserDetailsImpl) auth.getPrincipal();
         User currentUser = userRepository.findById(userDetails.getId()).get();
         currentUser.setFirebaseToken(firebaseToken);
+
+        String[] topicsArr;
+        if (currentUser.getTopics() != null)
+            topicsArr = currentUser.getTopics().split(",");
+        else
+            topicsArr = new String[]{};
+
+        List<String> topics = new ArrayList<>(Arrays.asList(topicsArr));
+        topics.forEach((topic)->{
+            try {
+                firebaseService.subscribe(firebaseToken, topic);
+            } catch (FirebaseMessagingException e) {
+                e.printStackTrace();
+            }
+        });
         userRepository.save(currentUser);
         return "Saved Token: "+ firebaseToken;
     }
@@ -116,6 +131,24 @@ public class FireBaseTestController {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         UserDetailsImpl userDetails = (UserDetailsImpl) auth.getPrincipal();
         User currentUser = userRepository.findById(userDetails.getId()).get();
+
+        String[] topicsArr;
+        if (currentUser.getTopics() != null)
+            topicsArr = currentUser.getTopics().split(",");
+        else
+            topicsArr = new String[]{};
+
+        List<String> topics = new ArrayList<>(Arrays.asList(topicsArr));
+        String firebaseToken = currentUser.getFirebaseToken();
+        topics.forEach((topic)->{
+            try {
+                firebaseService.unSubscribe(firebaseToken, topic);
+            } catch (FirebaseMessagingException e) {
+                e.printStackTrace();
+            }
+        });
+
+
         currentUser.setFirebaseToken(null);
         userRepository.save(currentUser);
         return "Token deleted";
