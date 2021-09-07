@@ -6,7 +6,7 @@ public class Note {
     private String subject;
     private String content;
     private Map<String, String> data;
-    private String image;
+//    private String image;
 
 
     public String getSubject() {
@@ -33,11 +33,11 @@ public class Note {
         this.data = data;
     }
 
-    public String getImage() {
-        return image;
-    }
-
-    public void setImage(String image) {
-        this.image = image;
-    }
+//    public String getImage() {
+//        return image;
+//    }
+//
+//    public void setImage(String image) {
+//        this.image = image;
+//    }
 }

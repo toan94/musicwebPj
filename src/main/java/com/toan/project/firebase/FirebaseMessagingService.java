@@ -41,16 +41,22 @@ public class FirebaseMessagingService {
         return firebaseMessaging.send(message);
     }
 
-    public TopicManagementResponse subscribe(String token) throws FirebaseMessagingException {
+    public TopicManagementResponse subscribe(String token, String topic) throws FirebaseMessagingException {
         List<String> tokens = Arrays.asList(token);
         TopicManagementResponse response = firebaseMessaging.subscribeToTopic(
                 tokens,
-                "mytopic");
-
+                topic);
+        return response;
+    }
+    public TopicManagementResponse unSubscribe(String token, String topic) throws FirebaseMessagingException {
+        List<String> tokens = Arrays.asList(token);
+        TopicManagementResponse response = firebaseMessaging.unsubscribeFromTopic(
+                tokens,
+                topic);
         return response;
     }
 
-    public String sendNotificationToTopic(Note note) throws FirebaseMessagingException {
+    public String sendNotificationToTopic(Note note, String topic) throws FirebaseMessagingException {
 
         Notification notification = Notification
                 .builder()
@@ -62,7 +68,7 @@ public class FirebaseMessagingService {
 //        data.put("display", note.getData();
         Message message = Message
                 .builder()
-                .setTopic("mytopic")
+                .setTopic(topic)
                 .setNotification(notification)
                 .putAllData(note.getData())
                 .build();

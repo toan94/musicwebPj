@@ -44,10 +44,27 @@ public class TestController {
     public ResponseEntity<Map<String, Object>> getAllTutorials(
             @RequestParam(required = false) String title,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "3") int size
+            @RequestParam(defaultValue = "9") int size
     ) {
 
         try {
+            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+            UserDetailsImpl userDetails = (UserDetailsImpl) auth.getPrincipal();
+            User currentUser = userRepository.findById(userDetails.getId()).get();
+
+//            String subbed = currentUser.getTopics();
+//            String subbedNoUnderscore = subbed.replaceAll("_", " ");
+            String subbedNoUnderscore;
+            String[] topicsArr;
+            if (currentUser.getTopics() != null) {
+                subbedNoUnderscore = currentUser.getTopics().replaceAll("_", " ");
+                topicsArr = subbedNoUnderscore.split(",");
+            }
+            else
+                topicsArr = new String[]{};
+
+            List<String> subbed = new ArrayList<>(Arrays.asList(topicsArr));
+
             List<User> users = new ArrayList<User>();
             Pageable paging = PageRequest.of(page, size);
 
@@ -70,6 +87,7 @@ public class TestController {
 
             Map<String, Object> response = new HashMap<>();
             response.put("artistList", uPayload);
+            response.put("subbed", subbed);
             response.put("currentPage", pageUsers.getNumber());
             response.put("totalItems", pageUsers.getTotalElements());
             response.put("totalPages", pageUsers.getTotalPages());

@@ -18,6 +18,13 @@ public class User {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long user_id;
 
+	private String firebaseToken;
+
+	private String topics;
+
+	@OneToMany(mappedBy = "sender", cascade = CascadeType.ALL)
+	private Set<PushMessage> sentMessage;
+
 	@NotBlank
 	@Size(max = 20)
 	private String username;
@@ -50,8 +57,33 @@ public class User {
 	public User() {
 	}
 
+
+	public String getTopics() {
+		return topics;
+	}
+
+	public void setTopics(String topics) {
+		this.topics = topics;
+	}
+
+	public Set<PushMessage> getSentMessage() {
+		return sentMessage;
+	}
+
+	public void setSentMessage(Set<PushMessage> sentMessage) {
+		this.sentMessage = sentMessage;
+	}
+
 	public String getAvatarLink() {
 		return AvatarLink;
+	}
+
+	public String getFirebaseToken() {
+		return firebaseToken;
+	}
+
+	public void setFirebaseToken(String firebaseToken) {
+		this.firebaseToken = firebaseToken;
 	}
 
 	public void setAvatarLink(String avatarLink) {
