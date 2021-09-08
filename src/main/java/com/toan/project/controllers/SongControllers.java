@@ -56,6 +56,7 @@ public class SongControllers {
 
     @GetMapping("/all")
     public ResponseEntity<Map<String, Object>> getAllSongs(
+            @RequestParam(required = false) String genre,
             @RequestParam(required = false) String title,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "3") int size
@@ -75,10 +76,14 @@ public class SongControllers {
             Pageable paging = PageRequest.of(page, size);
 
             Page<Song> pageSongs;
-            if (title == null)
+            if (title == null && genre == null)
                 pageSongs = songRepository.findAll(paging);
-            else
+            else if (title == null && genre != null)
+                pageSongs = songRepository.findByGenreContaining(genre, paging);
+            else if (title != null && genre == null)
                 pageSongs = songRepository.findByNameContaining(title, paging);
+            else
+                pageSongs = songRepository.findByGenreAndNameContaining(genre, title, paging);
 //            pageUsers = userRepository.findAll(paging);
 
             songs = pageSongs.getContent();
@@ -86,7 +91,7 @@ public class SongControllers {
             List<SongPayLoad> sPayload = songs.stream().map((s)->{
 //                boolean isPurchased = currentUser.getUser_id() == s.getBuyer().getUser_id();
                 SongPayLoad sp = new SongPayLoad(s.getId(), s.getName(), s.getArtist().getUsername(), s.isForSale(),
-                        false);
+                        false, s.getGenre());
                 s.getBuyers().forEach((buyer)->{
                     if (buyer.getUser_id() == currentUser.getUser_id()) {
 //                        isPurchased.set(true);
@@ -203,7 +208,7 @@ public class SongControllers {
 
             List<SongPayLoad> sPayload = pl.getSongs().stream().map((s)->{
                  SongPayLoad sp = new SongPayLoad(s.getId(), s.getName(), s.getArtist().getUsername(), s.isForSale(),
-                        false);
+                        false, s.getGenre());
                 s.getBuyers().forEach((buyer)->{
                     if (buyer.getUser_id() == currentUser.getUser_id()) {
                         sp.setPurchased(true);
@@ -227,7 +232,8 @@ public class SongControllers {
         Set<Song> songs = currentUser.getSongs();
 
         Set<SongPayLoad> sPayload = songs.stream().map((s)->{
-            SongPayLoad sp = new SongPayLoad(s.getId(),s.getName(),s.getArtist().getUsername(), s.isForSale(), false);
+            SongPayLoad sp = new SongPayLoad(s.getId(),s.getName(),s.getArtist().getUsername(), s.isForSale(), false,
+                    s.getGenre());
             s.getBuyers().forEach((buyer)->{
                 if (buyer.getUser_id() == currentUser.getUser_id()) {
                     sp.setPurchased(true);
@@ -259,7 +265,7 @@ public class SongControllers {
 
     @PostMapping("/upload")
     public ResponseEntity<?> uploadNewSong(@RequestParam MultipartFile file, @RequestParam String songName,
-                                           @RequestParam boolean forSale) throws IOException {
+                                           @RequestParam boolean forSale, @RequestParam String genre) throws IOException {
 
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         UserDetailsImpl userDetails = (UserDetailsImpl) auth.getPrincipal();
@@ -277,6 +283,7 @@ public class SongControllers {
             newSong.setName(songName);
             newSong.setArtist(currentUser);
             newSong.setForSale(forSale);
+            newSong.setGenre(genre);
             Set<User> buyers = new HashSet<>();
             buyers.add(currentUser);
             newSong.setBuyers(buyers);
@@ -313,7 +320,7 @@ public class SongControllers {
             Set<Song> songs = u.getSongs();
             Set<SongPayLoad> sPayload = songs.stream().map((s)->{
                 SongPayLoad sp =  new SongPayLoad(s.getId(), s.getName(), s.getArtist().getUsername(), s.isForSale(),
-                        false);
+                        false, s.getGenre());
                 s.getBuyers().forEach((buyer)->{
                     if (buyer.getUser_id() == currentUser.getUser_id()) {
                         sp.setPurchased(true);

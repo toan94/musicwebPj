@@ -40,6 +40,8 @@ public class Song {
     private boolean isForSale = false;
 
 
+    private String genre;
+
     @ManyToOne
     @JoinColumn(name="user_id")
     @NotNull
@@ -75,6 +77,14 @@ public class Song {
 
     public void setBuyers(Set<User> buyers) {
         this.buyers = buyers;
+    }
+
+    public String getGenre() {
+        return this.genre;
+    }
+
+    public void setGenre(String genre) {
+        this.genre = genre;
     }
 
     public User getArtist() {

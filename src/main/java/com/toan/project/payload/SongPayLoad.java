@@ -42,12 +42,21 @@ public class SongPayLoad {
         isPurchased = purchased;
     }
 
-    public SongPayLoad(long id, String name, String artist, boolean isForSale, boolean isPurchased) {
+    public String getGenre() {
+        return genre;
+    }
+
+    public void setGenre(String genre) {
+        this.genre = genre;
+    }
+
+    public SongPayLoad(long id, String name, String artist, boolean isForSale, boolean isPurchased, String genre) {
         this.id = id;
         this.name = name;
         this.artist = artist;
         this.isForSale = isForSale;
         this.isPurchased = isPurchased;
+        this.genre = genre;
     }
 
     private long id;
@@ -55,5 +64,6 @@ public class SongPayLoad {
     private String artist;
     private boolean isForSale;
     private boolean isPurchased;
+    private String genre;
 
 }
