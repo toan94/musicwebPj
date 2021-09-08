@@ -1,7 +1,10 @@
 package com.toan.project.stripe;
 
 import com.stripe.exception.StripeException;
+import com.toan.project.models.Song;
 import com.toan.project.models.User;
+import com.toan.project.payload.request.BuySongRequestPayload;
+import com.toan.project.repository.SongRepository;
 import com.toan.project.repository.UserRepository;
 import com.toan.project.security.services.UserDetailsImpl;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 @RestController
 @CrossOrigin(origins = "*", maxAge = 3600)
@@ -25,6 +29,9 @@ public class PaymentController {
 
     @Autowired
     UserRepository userRepository;
+
+    @Autowired
+    SongRepository songRepository;
 
     @PostMapping
     public ResponseEntity<Map<String, Object>> completePayment(@RequestBody PaymentRequest request) throws StripeException {
@@ -61,6 +68,43 @@ public class PaymentController {
         User currentUser = userRepository.findById(userDetails.getId()).get();
 
         return currentUser.getCoin()/10;
+    }
+
+    @PostMapping("buySong")
+    public ResponseEntity<String> buySong(@RequestBody BuySongRequestPayload buySongRequest)  {
+
+        final Long addition = 7L;
+        final Long subtraction = 10L;
+
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        UserDetailsImpl userDetails = (UserDetailsImpl) auth.getPrincipal();
+
+        User currentUser = userRepository.findById(userDetails.getId()).get();
+        Long currentUserCoin = currentUser.getCoin()/10;
+        String message = "";
+        if (currentUserCoin <10 ) {
+            message = "Not enough Coin";
+            return new ResponseEntity<>(message, HttpStatus.FORBIDDEN);
+        }
+
+        User seller = userRepository.findByUsername(buySongRequest.getArtistName()).get();
+        Long sellerCoin = seller.getCoin()/10;
+
+        currentUser.setCoin((currentUserCoin - subtraction)*10);
+        seller.setCoin((sellerCoin + addition)*10);
+
+        Song song = songRepository.findById(buySongRequest.getSongId()).get();
+        Set<User> buyers = song.getBuyers();
+        buyers.add(currentUser);
+        song.setBuyers(buyers);
+
+        userRepository.save(currentUser);
+        userRepository.save(seller);
+        songRepository.save(song);
+        message = "Purchase success!";
+        return new ResponseEntity<>(message, HttpStatus.OK);
+
+
     }
 
 }
