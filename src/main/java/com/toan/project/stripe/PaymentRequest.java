@@ -6,9 +6,9 @@ public class PaymentRequest {
         USD;
     }
     private String description;
-    private int amount;
+    private Long amount;
     private Currency currency;
-    private String stripeEmail;
+//    private String stripeEmail;
     private Token token;
 
     public String getDescription() {
@@ -17,10 +17,10 @@ public class PaymentRequest {
     public void setDescription(String description) {
         this.description = description;
     }
-    public int getAmount() {
+    public Long getAmount() {
         return amount;
     }
-    public void setAmount(int amount) {
+    public void setAmount(Long amount) {
         this.amount = amount;
     }
     public Currency getCurrency() {
@@ -29,12 +29,12 @@ public class PaymentRequest {
     public void setCurrency(Currency currency) {
         this.currency = currency;
     }
-    public String getStripeEmail() {
-        return stripeEmail;
-    }
-    public void setStripeEmail(String stripeEmail) {
-        this.stripeEmail = stripeEmail;
-    }
+//    public String getStripeEmail() {
+//        return stripeEmail;
+//    }
+//    public void setStripeEmail(String stripeEmail) {
+//        this.stripeEmail = stripeEmail;
+//    }
     public Token getToken() {
         return token;
     }

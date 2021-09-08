@@ -37,7 +37,7 @@ public class Song {
 //    @Size(max = 100)
 //    @Column(name="description")
 //    private String description;
-
+    private boolean isForSale = false;
 
 
     @ManyToOne
@@ -45,12 +45,32 @@ public class Song {
     @NotNull
     private User artist;
 
+    @ManyToOne
+    @JoinColumn(name="user_id", insertable=false, updatable=false)
+    private User buyer;
+
     public Set<Playlist> getCurrentlyInPlayListSet() {
         return currentlyInPlayListSet;
     }
 
     public void setCurrentlyInPlayListSet(Set<Playlist> currentlyInPlayListSet) {
         this.currentlyInPlayListSet = currentlyInPlayListSet;
+    }
+
+    public boolean isForSale() {
+        return isForSale;
+    }
+
+    public void setForSale(boolean forSale) {
+        isForSale = forSale;
+    }
+
+    public User getBuyer() {
+        return buyer;
+    }
+
+    public void setBuyer(User buyer) {
+        this.buyer = buyer;
     }
 
     public User getArtist() {

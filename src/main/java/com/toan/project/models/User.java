@@ -22,6 +22,9 @@ public class User {
 
 	private String topics;
 
+	@OneToMany(mappedBy = "buyer", cascade = CascadeType.ALL)
+	private Set<Song> purchasedSong;
+
 	@OneToMany(mappedBy = "sender", cascade = CascadeType.ALL)
 	private Set<PushMessage> sentMessage;
 
@@ -34,11 +37,15 @@ public class User {
 	@Email
 	private String email;
 
+	private Long coin = 0L;
+
+
 	@NotBlank
 	@Size(max = 120)
 	private String password;
 
 	private String AvatarLink;
+
 
 	@ManyToMany(fetch = FetchType.LAZY)
 	@JoinTable(	name = "user_roles", 
@@ -64,6 +71,22 @@ public class User {
 
 	public void setTopics(String topics) {
 		this.topics = topics;
+	}
+
+	public Set<Song> getPurchasedSong() {
+		return purchasedSong;
+	}
+
+	public void setPurchasedSong(Set<Song> purchasedSong) {
+		this.purchasedSong = purchasedSong;
+	}
+
+	public Long getCoin() {
+		return coin;
+	}
+
+	public void setCoin(Long coin) {
+		this.coin = coin;
 	}
 
 	public Set<PushMessage> getSentMessage() {
