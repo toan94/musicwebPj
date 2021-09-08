@@ -22,7 +22,7 @@ public class User {
 
 	private String topics;
 
-	@OneToMany(mappedBy = "buyer", cascade = CascadeType.ALL)
+	@ManyToMany(mappedBy = "buyers")
 	private Set<Song> purchasedSong;
 
 	@OneToMany(mappedBy = "sender", cascade = CascadeType.ALL)

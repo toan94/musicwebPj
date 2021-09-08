@@ -33,6 +33,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
@@ -66,6 +67,9 @@ public class SongControllers {
 //        }).collect(Collectors.toList());
 //
 //        return sPayLoad;
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        UserDetailsImpl userDetails = (UserDetailsImpl) auth.getPrincipal();
+        User currentUser = userRepository.findById(userDetails.getId()).get();
         try {
             List<Song> songs = new ArrayList<Song>();
             Pageable paging = PageRequest.of(page, size);
@@ -78,8 +82,18 @@ public class SongControllers {
 //            pageUsers = userRepository.findAll(paging);
 
             songs = pageSongs.getContent();
+//            AtomicBoolean isPurchased = new AtomicBoolean(false);
             List<SongPayLoad> sPayload = songs.stream().map((s)->{
-                return new SongPayLoad(s.getId(), s.getName(), s.getArtist().getUsername());
+//                boolean isPurchased = currentUser.getUser_id() == s.getBuyer().getUser_id();
+                SongPayLoad sp = new SongPayLoad(s.getId(), s.getName(), s.getArtist().getUsername(), s.isForSale(),
+                        false);
+                s.getBuyers().forEach((buyer)->{
+                    if (buyer.getUser_id() == currentUser.getUser_id()) {
+//                        isPurchased.set(true);
+                        sp.setPurchased(true);
+                    }
+                });
+                return sp;
             }).collect(Collectors.toList());
 
             Map<String, Object> response = new HashMap<>();
@@ -179,12 +193,23 @@ public class SongControllers {
     @GetMapping("/songsFromPlaylist")
     public ResponseEntity<Map<String, Object>> getAllSongsFromPlaylist(@RequestParam Long playlistId) {
 
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        UserDetailsImpl userDetails = (UserDetailsImpl) auth.getPrincipal();
+        User currentUser = userRepository.findById(userDetails.getId()).get();
 
         Optional<Playlist> playlist = playlistRepository.findById(playlistId);
         if (playlist.isPresent()) {
             Playlist pl = playlist.get();
+
             List<SongPayLoad> sPayload = pl.getSongs().stream().map((s)->{
-                return new SongPayLoad(s.getId(), s.getName(), s.getArtist().getUsername());
+                 SongPayLoad sp = new SongPayLoad(s.getId(), s.getName(), s.getArtist().getUsername(), s.isForSale(),
+                        false);
+                s.getBuyers().forEach((buyer)->{
+                    if (buyer.getUser_id() == currentUser.getUser_id()) {
+                        sp.setPurchased(true);
+                    }
+                });
+                return sp;
             }).collect(Collectors.toList());
             Map<String, Object> response = new HashMap<>();
             response.put("songList", sPayload);
@@ -202,7 +227,13 @@ public class SongControllers {
         Set<Song> songs = currentUser.getSongs();
 
         Set<SongPayLoad> sPayload = songs.stream().map((s)->{
-            return new SongPayLoad(s.getId(),s.getName(),s.getArtist().getUsername());
+            SongPayLoad sp = new SongPayLoad(s.getId(),s.getName(),s.getArtist().getUsername(), s.isForSale(), false);
+            s.getBuyers().forEach((buyer)->{
+                if (buyer.getUser_id() == currentUser.getUser_id()) {
+                    sp.setPurchased(true);
+                }
+            });
+            return sp;
         }).collect(Collectors.toSet());
 
         Map<String, Object> response = new HashMap<>();
@@ -267,13 +298,23 @@ public class SongControllers {
 
     @GetMapping("/songsOfUser")
     public ResponseEntity<Map<String, Object>> getSongsByUsername(@RequestParam String username) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        UserDetailsImpl userDetails = (UserDetailsImpl) auth.getPrincipal();
+        User currentUser = userRepository.findById(userDetails.getId()).get();
         Optional<User> user = userRepository.findByUsername(username);
         if (user.isPresent()) {
 
             User u = user.get();
             Set<Song> songs = u.getSongs();
             Set<SongPayLoad> sPayload = songs.stream().map((s)->{
-                return new SongPayLoad(s.getId(), s.getName(), s.getArtist().getUsername());
+                SongPayLoad sp =  new SongPayLoad(s.getId(), s.getName(), s.getArtist().getUsername(), s.isForSale(),
+                        false);
+                s.getBuyers().forEach((buyer)->{
+                    if (buyer.getUser_id() == currentUser.getUser_id()) {
+                        sp.setPurchased(true);
+                    }
+                });
+                return sp;
             }).collect(Collectors.toSet());
 
             Map<String, Object> response = new HashMap<>();

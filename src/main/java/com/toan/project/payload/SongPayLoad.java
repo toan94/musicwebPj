@@ -26,14 +26,34 @@ public class SongPayLoad {
         this.artist = artist;
     }
 
-    public SongPayLoad(long id, String name, String artist) {
+    public boolean isForSale() {
+        return isForSale;
+    }
+
+    public void setForSale(boolean forSale) {
+        isForSale = forSale;
+    }
+
+    public boolean isPurchased() {
+        return isPurchased;
+    }
+
+    public void setPurchased(boolean purchased) {
+        isPurchased = purchased;
+    }
+
+    public SongPayLoad(long id, String name, String artist, boolean isForSale, boolean isPurchased) {
         this.id = id;
         this.name = name;
         this.artist = artist;
+        this.isForSale = isForSale;
+        this.isPurchased = isPurchased;
     }
 
     private long id;
     private String name;
     private String artist;
+    private boolean isForSale;
+    private boolean isPurchased;
 
 }

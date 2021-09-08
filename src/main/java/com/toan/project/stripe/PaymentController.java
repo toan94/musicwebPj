@@ -54,13 +54,13 @@ public class PaymentController {
         return new ResponseEntity<String>(ex.getMessage(), HttpStatus.BAD_REQUEST);
     }
 
-    @GetMapping("/getAmount")
-    public Long getAmount(){
+    @GetMapping("/getBalance")
+    public Long getBalance(){
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         UserDetailsImpl userDetails = (UserDetailsImpl) auth.getPrincipal();
         User currentUser = userRepository.findById(userDetails.getId()).get();
 
-        return currentUser.getCoin();
+        return currentUser.getCoin()/10;
     }
 
 }

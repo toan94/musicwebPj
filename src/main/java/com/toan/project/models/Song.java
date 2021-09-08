@@ -45,9 +45,13 @@ public class Song {
     @NotNull
     private User artist;
 
-    @ManyToOne
-    @JoinColumn(name="user_id", insertable=false, updatable=false)
-    private User buyer;
+    @ManyToMany
+    @JoinTable(
+            name = "userBuyer_Song",
+            joinColumns = @JoinColumn(name = "id"),
+            inverseJoinColumns = @JoinColumn(name = "user_id")
+    )
+    private Set<User> buyers;
 
     public Set<Playlist> getCurrentlyInPlayListSet() {
         return currentlyInPlayListSet;
@@ -65,12 +69,12 @@ public class Song {
         isForSale = forSale;
     }
 
-    public User getBuyer() {
-        return buyer;
+    public Set<User> getBuyers() {
+        return buyers;
     }
 
-    public void setBuyer(User buyer) {
-        this.buyer = buyer;
+    public void setBuyers(Set<User> buyers) {
+        this.buyers = buyers;
     }
 
     public User getArtist() {
