@@ -258,7 +258,8 @@ public class SongControllers {
     }
 
     @PostMapping("/upload")
-    public ResponseEntity<?> uploadNewSong(@RequestParam MultipartFile file, @RequestParam String songName) throws IOException {
+    public ResponseEntity<?> uploadNewSong(@RequestParam MultipartFile file, @RequestParam String songName,
+                                           @RequestParam boolean forSale) throws IOException {
 
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         UserDetailsImpl userDetails = (UserDetailsImpl) auth.getPrincipal();
@@ -275,6 +276,10 @@ public class SongControllers {
             Song newSong = new Song();
             newSong.setName(songName);
             newSong.setArtist(currentUser);
+            newSong.setForSale(forSale);
+            Set<User> buyers = new HashSet<>();
+            buyers.add(currentUser);
+            newSong.setBuyers(buyers);
             songRepository.save(newSong);
 
             String subject = currentUser.getUsername() + " uploaded a new song";
